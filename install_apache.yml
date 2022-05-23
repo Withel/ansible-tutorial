@@ -7,21 +7,24 @@
   # it will define list of tasks
   tasks:
 
-  - name: update repository index
+  - name: update repository index for Ubuntu
     apt:
       update_cache: yes
+    when: ansible_distribution == "Ubuntu"
 
   # we give it a name which should be descriptive
-  - name: install apache2 package
+  - name: install apache2 package for Ubuntu
     # apt is module we want to use
     apt: 
       name: apache2
       state: latest
+    when: ansible_distribution == "Ubuntu"
 
-  - name: Add php support for apache
+  - name: Add php support for apache for Ubuntu
     apt: 
       name: libapache2-mod-php
       state: latest
+    when: ansible_distribution == "Ubuntu"
   # - name: Collect facts about system services
   #   service_facts:
   #     register: services_state
@@ -29,3 +32,23 @@
   # - name: Debug
   #   debug:
   #     var: services_state
+
+
+  # For CentOS
+  - name: update repository index for CentOS
+    dnf:
+      update_cache: yes
+    when: ansible_distribution_version == "CentOS"
+
+  - name: install apache2 package for CentOS
+    # Now dnf is module we want to use
+    dnf: 
+      name: httpd
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: Add php support for apache for CentOS
+    dnf: 
+      name: php
+      state: latest
+    when: ansible_distribution == "CentOS"
