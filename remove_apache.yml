@@ -1,0 +1,32 @@
+---
+
+# begining of a statment or block will begin with - 
+# so we want to run against every server
+- hosts: all
+  become: true
+  # it will define list of tasks
+  tasks:
+
+  - name: update repository index
+    apt:
+      update_cache: yes
+
+  # we give it a name which should be descriptive
+  - name: remove apache2 package
+    # apt is module we want to use
+    apt: 
+      name: apache2
+      state: absent
+
+  - name: remove php support for apache
+    apt: 
+      name: libapache2-mod-php
+      state: absent
+
+  # - name: Collect facts about system services
+  #   service_facts:
+  #     register: services_state
+
+  # - name: Debug
+  #   debug:
+  #     var: services_state
