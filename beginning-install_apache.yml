@@ -1,0 +1,60 @@
+---
+
+# begining of a statment or block will begin with - 
+# so we want to run against every server
+- hosts: all
+  become: true
+
+  # it will define list of tasks
+  tasks:
+
+  # - name: update repository index for Ubuntu
+  #   apt:
+  #     update_cache: yes
+  #   when: ansible_distribution == "Ubuntu"
+
+  # For Ubuntu
+  # we give it a name which should be descriptive
+  - name: install apache and php packages 
+    # apt is module we want to use
+    # you can use lists to install multiple packages with one play 
+    apt: 
+    # while installing packages you can refer to variables 
+      name: 
+        - "{{ apache_package }}"
+        - "{{ php_package }}"
+      state: latest
+      # it does the same what "update repository index for Ubuntu" play
+      update_cache: yes
+    # when: ansible_distribution == "Ubuntu"
+
+  # - name: Add php support for apache for Ubuntu
+  #   apt: 
+  #     name: libapache2-mod-php
+  #     state: latest
+  #   when: ansible_distribution == "Ubuntu"
+
+# ==========================================================
+# ==========================================================
+
+  # For CentOS
+  # - name: update repository index for CentOS
+  #   dnf:
+  #     update_cache: yes
+  #   when: ansible_distribution_version == "CentOS"
+
+  # - name: install apache2 and php packages for CentOS
+  #   # Now dnf is module we want to use
+  #   dnf: 
+  #     name: 
+  #       - httpd
+  #       - php
+  #     state: latest
+  #     update_cache: yes
+  #   when: ansible_distribution == "CentOS"
+
+  # - name: Add php support for apache for CentOS
+  #   dnf: 
+  #     name: php
+  #     state: latest
+  #   when: ansible_distribution == "CentOS"
