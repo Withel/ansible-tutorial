@@ -1,3 +1,8 @@
+[web_servers]
 20.118.26.138   ansible_user=azureuser
+
+[db_servers]
 52.180.154.231  ansible_user=azureuser
+
+[file_servers]
 52.180.153.122  ansible_user=azureuser
