@@ -44,6 +44,19 @@
       state: latest
     when: ansible_distribution == "CentOS"
 
+  - name: copy default html file for site
+    tags: apache,apache2,httpd
+    # copy module is used 
+    copy:
+    # directory files is assumed so we don't need to call it
+      src: default_site.html
+    # file in the destination does not need to have the same name
+    # index html is default webroot for apache
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
 # =====================================
 # db_servers play
 # =====================================
