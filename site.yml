@@ -4,19 +4,65 @@
   become: true
   pre_tasks:
 
-  - name: install updates (CentOS)
+  - name: update repo cache (CentOS)
     tags: always
-    dnf:
-      update_only: yes
+    yum:
+      # update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "CentOS"
 
-  - name: install updates (Ubuntu)
+  - name: update repo cache (Ubuntu)
     tags: always
     apt:
-      upgrade: dist
+      # upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
+
+# =====================================
+# users management
+# =====================================
+
+- hosts: all
+  become: true
+  tasks:
+
+  # we want to be able to log as simone 
+  # after bootstrap it's just a placeholder
+  - name: add ssh key for simone
+    tags: always,users
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEF5bvFWct5CY2Fea3zo4+9lYmgyuWrnLbe/F4lTImq1 mat default"
+
+
+# =====================================
+# workstations play
+# =====================================
+
+# Adding new section that will target workstations
+# we can use ansible to probision our local workstation as well, but since its WSL I'm not doing that 
+- hosts: workstations
+  become: true
+  tasks: 
+
+  # first we install zip files that will allow to unzip files from command line
+  - name: install unzip
+    tags: terraform
+    package:
+      name: unzip
+
+  # it will allow to download and unzip file
+  - name: install terraform
+    tags: terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root 
 
 # =====================================
 # web_servers play
@@ -37,12 +83,37 @@
 
   - name: install apache and php for CentOS servers
     tags: apache,centos,httpd
-    dnf:
+    yum:
       name:
         - httpd
         - php
       state: latest
     when: ansible_distribution == "CentOS"
+
+  # starts httpd service for centos
+  - name: start httpd (CentOS)
+    tags: apache,centos,httpd
+    service: 
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: change e-mail address for admin
+    tags: apache,centos,httpd
+    lineinfile: 
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution == "CentOS"
+    register: httpd
+  
+  - name: restart httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
   - name: copy default html file for site
     tags: apache,apache2,httpd
@@ -66,7 +137,7 @@
   tasks:
   - name: install mariadb package (CentOS)
     tags: centos,db,mariadb
-    dnf:
+    yum:
       name: mariadb
       state: latest
     when: ansible_distribution == "CentOS"

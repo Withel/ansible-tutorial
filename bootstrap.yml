@@ -1,0 +1,50 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (CentOS)
+    tags: always
+    yum:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+# =====================================
+# users management
+# =====================================
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create simone user
+    tags: always,users
+    user:
+      name: simone
+      groups: root
+
+  # we want to be able to log as simone 
+  - name: add ssh key for simone
+    tags: always,users
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEF5bvFWct5CY2Fea3zo4+9lYmgyuWrnLbe/F4lTImq1 mat default"
+
+  # once simone is running we want to be able to run sudo 
+  - name: add sudoers file for simone
+    tags: always,users
+    copy: 
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root
+      mode: 0440
